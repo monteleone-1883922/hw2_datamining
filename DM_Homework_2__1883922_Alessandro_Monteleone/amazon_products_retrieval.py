@@ -1,9 +1,10 @@
 import requests as r
-import lxml as x 
+import lxml
+from lxml import etree
 import sys
 from fake_useragent import UserAgent
-from selenium import webdriver
-from bs4 import BeautifulSoup
+# from selenium import webdriver
+# from bs4 import BeautifulSoup
 
 URL =  "https://www.amazon.it/s?k={}&page={}"
 KEYWORD = "gpu"
@@ -62,6 +63,7 @@ def get_page(url, headers):
     # pars = soup.find("span", class_="a-size-base-plus a-color-base a-text-normal")
 
     handle_status_codes(response)
+    return response
 
 def set_user_agent(user_agent):
     headers = HEADERS
@@ -72,12 +74,21 @@ def set_random_user_agent(ua):
     return set_user_agent(ua.random)
 
 
+def html_find(html_fragment, element, html_class = ""):
+     if html_class == "":
+        return html_fragment.xpath(f'.//{element}') 
+     else :
+         return html_fragment.xpath(f'.//{element}[@class="{html_class}"]') 
+
+
 
 def test():
     url = build_url(KEYWORD,1)
     ua = UserAgent()
     h = set_random_user_agent(ua)
     page = get_page(url, h)
+    tree = etree.HTML(page.text)
+    elements = tree.xpath('//span[@class="a-size-base-plus a-color-base a-text-normal"]')
     a = 3
 
 
