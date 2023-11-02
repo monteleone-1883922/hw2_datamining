@@ -23,6 +23,10 @@ HEADERS = {
         "Sec-Fetch-User": "?1",
 
     }
+PRODUCTS_AD_CLASS = "sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 AdHolder sg-col s-widget-spacing-small sg-col-4-of-20"
+PRODUCTS_CLASS = "sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20"
+PRODUCT_DESCRIPTION_CLASS = "a-size-base-plus a-color-base a-text-normal"
+PRODUCT_PRICE = "a-offscreen"
 
 
 def build_url(keyword,page):
@@ -89,8 +93,12 @@ def test():
     page = get_page(url, h)
     tree = etree.HTML(page.text)
     elements = tree.xpath('//span[@class="a-size-base-plus a-color-base a-text-normal"]')
-    a = 3
+   
 
+    products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
+    for product in products:
+        description = html_find(product, "span",PRODUCT_DESCRIPTION_CLASS )[0].text
+        price = html_find(product, "span",PRODUCT_PRICE )[0].text
 
 
 
