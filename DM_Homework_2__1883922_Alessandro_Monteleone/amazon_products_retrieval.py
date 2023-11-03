@@ -3,62 +3,15 @@ import lxml
 from lxml import etree
 import sys
 from fake_useragent import UserAgent
-# from selenium import webdriver
-# from bs4 import BeautifulSoup
+from utils_and_classes import *
+import time
 
-URL =  "https://www.amazon.it/s?k={}&page={}"
-KEYWORD = "gpu"
-MAX_NUM_PAGES = 10
-HEADERS = {
-        "Host": "www.amazon.it",
-        "User-Agent": "{}",       #"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3",
-        "Connection": "close",
-        "Cache-Control": "no-cache",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
 
-    }
-PRODUCTS_AD_CLASS = "sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 AdHolder sg-col s-widget-spacing-small sg-col-4-of-20"
-PRODUCTS_CLASS = "sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20"
-PRODUCT_DESCRIPTION_CLASS = "a-size-base-plus a-color-base a-text-normal"
-PRODUCT_PRICE = "a-offscreen"
 
 
 def build_url(keyword,page):
     return URL.format(keyword,page)
 
-def handle_status_codes(response):
-    if response.status_code == 200:
-        print("The request was successfully processed (HTTP 200 OK)")
-    elif response.status_code == 204:
-        print("The request was successfully processed, but no data is returned (HTTP 204 No Content)")
-        exit(1)
-    elif response.status_code == 400:
-        print("Bad request (HTTP 400 Bad Request)")
-        exit(1)
-    elif response.status_code == 401:
-        print("Unauthorized (HTTP 401 Unauthorized)")
-        exit(1)
-    elif response.status_code == 403:
-        print("Access forbidden (HTTP 403 Forbidden)")
-        exit(1)
-    elif response.status_code == 404:
-        print("Resource not found (HTTP 404 Not Found)")
-        exit(1)
-    elif response.status_code == 500:
-        print("Internal server error (HTTP 500 Internal Server Error)")
-        exit(1)
-    elif response.status_code == 503:
-        print("Service unavaliable or request refused (HTTP 503 Unavailable)")
-        exit(1)
-    else:
-        print("Unknown status code: ", response.status_code)
-        exit(1)
 
 def get_page(url, headers):
 
@@ -78,27 +31,29 @@ def set_random_user_agent(ua):
     return set_user_agent(ua.random)
 
 
-def html_find(html_fragment, element, html_class = ""):
-     if html_class == "":
-        return html_fragment.xpath(f'.//{element}') 
-     else :
-         return html_fragment.xpath(f'.//{element}[@class="{html_class}"]') 
-
 
 
 def test():
-    url = build_url(KEYWORD,1)
-    ua = UserAgent()
-    h = set_random_user_agent(ua)
-    page = get_page(url, h)
-    tree = etree.HTML(page.text)
-    elements = tree.xpath('//span[@class="a-size-base-plus a-color-base a-text-normal"]')
-   
+   pass
+        
 
-    products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
-    for product in products:
-        description = html_find(product, "span",PRODUCT_DESCRIPTION_CLASS )[0].text
-        price = html_find(product, "span",PRODUCT_PRICE )[0].text
+def store_amazon_products():
+    ua = UserAgent()
+    with open("amazon_products_gpu.tsv","w") as file:
+        file.write("description\tprice\tprime\turl\tstars\tnum_reviews\n")
+        for i in range(MAX_NUM_PAGES):
+            print("getting page ", i+1)
+            url = build_url(KEYWORD,i+1)
+            headers = set_random_user_agent(ua)
+            page = get_page(url, headers)
+            tree = etree.HTML(page.text)
+            products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
+            for product_html in products:
+                product = Product(product_html)
+                file.write(product.to_string_tsv() + "\n")
+            time.sleep(20)
+
+
 
 
 
