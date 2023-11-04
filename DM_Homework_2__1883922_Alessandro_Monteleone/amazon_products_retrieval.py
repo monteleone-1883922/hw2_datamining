@@ -40,20 +40,21 @@ def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_inf
         print("getting page ", start_page+1)
         try:
             page = get_page(url, headers)
+            tree = etree.HTML(page.text)
+            with open("test.html","w") as f:
+                f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
+            products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
+            for product_html in products:
+                product = Product(product_html,data_info)
+                store_file.write(product.to_string_tsv() + "\n")
+            print("start sleeping")
+            time.sleep(100)
+            print("wake up")
+            start_page += 1
         except:
             retrieve_page_products(start_page,store_file,ua,data_info)
        
-        tree = etree.HTML(page.text)
-        with open("test.html","w") as f:
-            f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
-        products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
-        for product_html in products:
-            product = Product(product_html,data_info)
-            store_file.write(product.to_string_tsv() + "\n")
-        print("start sleeping")
-        time.sleep(100)
-        print("wake up")
-        start_page += 1
+        
 
 
 
