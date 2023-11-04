@@ -49,7 +49,7 @@ def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_inf
             time.sleep(100)
             print("wake up")
             start_page += 1
-        except:
+        except Exception as e:
             retrieve_page_products(start_page,store_file,ua,data_info)
        
         
