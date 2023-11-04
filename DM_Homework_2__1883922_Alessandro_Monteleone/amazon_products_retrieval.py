@@ -35,28 +35,38 @@ def set_random_user_agent(ua : UserAgent) -> Dict[str,str]:
 def test():
    pass
         
+def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_info : DataInfo):
+    while start_page < MAX_NUM_PAGES:
+        headers = set_random_user_agent(ua)
+        print("getting page ", start_page+1)
+        try:
+            url = build_url(KEYWORD,start_page+1)
+        except:
+            retrieve_page_products(start_page,store_file,ua,data_info)
+        page = get_page(url, headers)
+        tree = etree.HTML(page.text)
+        with open("test.html","w") as f:
+            f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
+        products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
+        for product_html in products:
+            product = Product(product_html,data_info)
+            store_file.write(product.to_string_tsv() + "\n")
+        print("start sleeping")
+        time.sleep(100)
+        print("wake up")
+        start_page += 1
+
+
 
 def store_amazon_products():
     
     warnings.filterwarnings('ignore', category=UserWarning, module='fake_useragent')
     ua = UserAgent()
-    headers = set_random_user_agent(ua)
+    
     data_info = DataInfo()
     with open("DM_Homework_2__1883922_Alessandro_Monteleone/amazon_products_gpu.tsv","w") as file:
         file.write("description\tprice\tprime\turl\tstars\tnum_reviews\n")
-        for i in range(MAX_NUM_PAGES):
-            print("getting page ", i+1)
-            url = build_url(KEYWORD,i+1)
-            
-            page = get_page(url, headers)
-            tree = etree.HTML(page.text)
-            with open("test.html","w") as f:
-                f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
-            products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
-            for product_html in products:
-                product = Product(product_html,data_info)
-                file.write(product.to_string_tsv() + "\n")
-            time.sleep(40)
+        retrieve_page_products(0,file,ua,data_info)
     warnings.filterwarnings('default', category=UserWarning, module='fake_useragent')
 
 

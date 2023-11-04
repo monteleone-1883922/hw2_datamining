@@ -41,28 +41,28 @@ def handle_status_codes(response : Response) -> None:
         print("The request was successfully processed (HTTP 200 OK)")
     elif response.status_code == 204:
         print("The request was successfully processed, but no data is returned (HTTP 204 No Content)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 400:
         print("Bad request (HTTP 400 Bad Request)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 401:
         print("Unauthorized (HTTP 401 Unauthorized)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 403:
         print("Access forbidden (HTTP 403 Forbidden)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 404:
         print("Resource not found (HTTP 404 Not Found)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 500:
         print("Internal server error (HTTP 500 Internal Server Error)")
-        exit(1)
+        raise Exception()
     elif response.status_code == 503:
         print("Service unavaliable or request refused (HTTP 503 Unavailable)")
-        exit(1)
+        raise Exception()
     else:
         print("Unknown status code: ", response.status_code)
-        exit(1)
+        raise Exception()
 
 
 class DataInfo():
