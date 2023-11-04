@@ -30,20 +30,19 @@ def set_random_user_agent(ua : UserAgent) -> Dict[str,str]:
     return set_user_agent(ua.random)
 
 
-
-#ASUS TUF Gaming NVIDIA GeForice RTX 3070 V2 OC Edition Scheda Grafica, 8GB GDDR6, PCIe 4.0, HDMI 2.1, DisplayPort 1.4a, GPU Tweak II, Componenti di Livello Militare, LHR
 def test():
    pass
         
 def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_info : DataInfo):
     while start_page < MAX_NUM_PAGES:
         headers = set_random_user_agent(ua)
+        url = build_url(KEYWORD,start_page+1)
         print("getting page ", start_page+1)
         try:
-            url = build_url(KEYWORD,start_page+1)
+            page = get_page(url, headers)
         except:
             retrieve_page_products(start_page,store_file,ua,data_info)
-        page = get_page(url, headers)
+       
         tree = etree.HTML(page.text)
         with open("test.html","w") as f:
             f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
@@ -68,6 +67,7 @@ def store_amazon_products():
         file.write("description\tprice\tprime\turl\tstars\tnum_reviews\n")
         retrieve_page_products(0,file,ua,data_info)
     warnings.filterwarnings('default', category=UserWarning, module='fake_useragent')
+    print(data_info)
 
 
 
