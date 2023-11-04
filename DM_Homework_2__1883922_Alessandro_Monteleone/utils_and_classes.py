@@ -8,16 +8,16 @@ KEYWORD = "gpu"
 MAX_NUM_PAGES = 10
 HEADERS = {
         "Host": "www.amazon.it",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",#"{}",       #"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+        "User-Agent": "{}",       #"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3",
         "Connection": "close",
-        "Cache-Control": "no-cache",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
+        # "Cache-Control": "no-cache",
+        # "Sec-Fetch-Dest": "document",
+        # "Sec-Fetch-Mode": "navigate",
+        # "Sec-Fetch-Site": "none",
+        # "Sec-Fetch-User": "?1",
 
     }
 PRODUCTS_AD_CLASS = "sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 AdHolder sg-col s-widget-spacing-small sg-col-4-of-20"
@@ -95,12 +95,12 @@ class Product():
 
         data_info.num_products += 1
         
-        self.description = self.get_field_handle_errors("description", html_product, "span",PRODUCT_DESCRIPTION_CLASS )
-        self.price = self.get_field_handle_errors("price",html_product, "span",PRODUCT_PRICE )
-        self.prime = self.get_field_handle_errors("prime",html_product,"i",PRIME)
-        self.url = self.get_field_handle_errors("url",html_product,"a",PRODUCT_PAGE_LINK)
-        self.stars = self.get_field_handle_errors("stars",html_product, "span", PRODUCT_STARS)
-        self.num_reviews = self.get_field_handle_errors("num_reviews",html_product, "span", PRODUCT_REVIEWS)
+        self.description = self.get_field_handle_errors("description", html_product, "span",PRODUCT_DESCRIPTION_CLASS,data_info )
+        self.price = self.get_field_handle_errors("price",html_product, "span",PRODUCT_PRICE ,data_info )
+        self.prime = self.get_field_handle_errors("prime",html_product,"i",PRIME,data_info )
+        self.url = self.get_field_handle_errors("url",html_product,"a",PRODUCT_PAGE_LINK,data_info )
+        self.stars = self.get_field_handle_errors("stars",html_product, "span", PRODUCT_STARS,data_info )
+        self.num_reviews = self.get_field_handle_errors("num_reviews",html_product, "span", PRODUCT_REVIEWS,data_info )
     
 
     def to_string_tsv(self) -> str:
