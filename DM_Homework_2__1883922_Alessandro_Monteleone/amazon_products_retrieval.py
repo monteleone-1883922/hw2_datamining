@@ -34,11 +34,12 @@ def test():
    pass
         
 def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_info : DataInfo):
-    while start_page < MAX_NUM_PAGES:
-        headers = set_random_user_agent(ua)
-        url = build_url(KEYWORD,start_page+1)
-        print("getting page ", start_page+1)
-        try:
+    try:
+        while start_page < MAX_NUM_PAGES:
+            headers = set_random_user_agent(ua)
+            url = build_url(KEYWORD,start_page+1)
+            print("getting page ", start_page+1)
+            
             page = get_page(url, headers)
             tree = etree.HTML(page.text)
             products = html_find(tree,"div",PRODUCTS_CLASS) + html_find(tree,"div",PRODUCTS_AD_CLASS)
@@ -49,8 +50,8 @@ def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_inf
             time.sleep(100)
             print("wake up")
             start_page += 1
-        except Exception as e:
-            retrieve_page_products(start_page,store_file,ua,data_info)
+    except Exception as e:
+        retrieve_page_products(start_page,store_file,ua,data_info)
        
         
 # with open("test.html","w") as f:

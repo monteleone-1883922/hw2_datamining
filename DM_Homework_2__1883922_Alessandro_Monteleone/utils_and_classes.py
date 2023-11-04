@@ -79,12 +79,12 @@ class DataInfo():
     def __str__(self) -> str:
         return "total number of products = " + str(self.num_products) + \
             "\nERRORS\n" + \
-            "description errors = " + str(self.description_errors) + \
-            "prime errors = " + str(self.prime_errors) + \
-            "price errors = " + str(self.price_errors) + \
-            "stars errors = " + str(self.stars_errors) + \
-            "number of reviews errors = " + str(self.num_reviews_errors) + \
-            "url errors = " + str(self.url_errors)
+            "description errors = " + str(self.description_errors) + "\n" + \
+            "prime errors = " + str(self.prime_errors) + "\n" + \
+            "price errors = " + str(self.price_errors) + "\n" + \
+            "stars errors = " + str(self.stars_errors) + "\n" + \
+            "number of reviews errors = " + str(self.num_reviews_errors) + "\n" + \
+            "url errors = " + str(self.url_errors) + "\n"
     
 
 
