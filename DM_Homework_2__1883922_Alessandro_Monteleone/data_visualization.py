@@ -3,6 +3,7 @@ import pandas as pd
 import subprocess
 import webbrowser
 import os
+from amazon_product_analysis import *
 
 
 import plotly.graph_objects as go
@@ -23,26 +24,37 @@ HTML_PAGE = """<!DOCTYPE html>
 START_SERVER = "python3 -m http.server"
 
 
-def generate_index():
-    df = pd.read_csv('DM_Homework_2__1883922_Alessandro_Monteleone/amazon_products_gpu.tsv', sep='\t')
-    with open("DM_Homework_2__1883922_Alessandro_Monteleone/server/index.html", "w") as f:
+def generate_index_html(df):
+    
+    with open("server/index.html", "w") as f:
         html_table = df.to_html()
         f.write(HTML_PAGE.format(html_table))
 
    
 
-
-
-if __name__ == "__main__":
-
+def visualize_table(df):
+    generate_index_html(df)
     cwd = os.getcwd()
     server_dir = os.path.join(cwd, "server")
 
     command = START_SERVER  
     process = subprocess.Popen(command, shell=True, text=True, cwd=server_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     webbrowser.open("http://127.0.0.1:8000/")
-    # Attendi che il comando venga completato
+    
     output, errore = process.communicate()
+
+
+
+
+def main():
+    df = load_data()
+    df_ordered_price = top10(df,"price")
+    visualize_table(df_ordered_price)
+
+if __name__ == "__main__":
+    main()
+
+    
 
 
 
