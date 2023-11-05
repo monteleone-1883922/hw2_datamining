@@ -4,7 +4,7 @@ import subprocess
 import webbrowser
 import os
 from amazon_product_analysis import *
-
+from typing import *
 
 import plotly.graph_objects as go
 
@@ -24,7 +24,7 @@ HTML_PAGE = """<!DOCTYPE html>
 START_SERVER = "python3 -m http.server"
 
 
-def generate_index_html(df):
+def generate_index_html(df : pd.DataFrame) -> None:
     
     with open("server/index.html", "w") as f:
         html_table = df.to_html()
@@ -32,7 +32,7 @@ def generate_index_html(df):
 
    
 
-def visualize_table(df):
+def visualize_table(df : pd.DataFrame) -> None:
     generate_index_html(df)
     cwd = os.getcwd()
     server_dir = os.path.join(cwd, "server")
