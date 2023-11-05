@@ -54,17 +54,13 @@ def retrieve_page_products(start_page : int,store_file, ua : UserAgent, data_inf
         retrieve_page_products(start_page,store_file,ua,data_info)
        
         
-# with open("test.html","w") as f:
-#                 f.write(lxml.etree.tostring(tree, pretty_print=True, encoding='unicode'))
-
-
 def store_amazon_products():
     
     warnings.filterwarnings('ignore', category=UserWarning, module='fake_useragent')
     ua = UserAgent()
     
     data_info = DataInfo()
-    with open("DM_Homework_2__1883922_Alessandro_Monteleone/amazon_products_gpu.tsv","w") as file:
+    with open("data/amazon_products_gpu.tsv","w") as file:
         file.write("description\tprice\tprime\turl\tstars\tnum_reviews\n")
         retrieve_page_products(0,file,ua,data_info)
     warnings.filterwarnings('default', category=UserWarning, module='fake_useragent')
