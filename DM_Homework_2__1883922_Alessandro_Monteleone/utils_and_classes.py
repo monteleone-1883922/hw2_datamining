@@ -2,6 +2,9 @@
 import lxml
 from typing import *
 from requests import Response
+import json
+from nltk.tokenize import word_tokenize
+import nltk
 
 URL =  "https://www.amazon.it/s?k={}&page={}"
 KEYWORD = "gpu"
@@ -28,6 +31,9 @@ PRIME = "a-icon a-icon-prime a-icon-medium"
 PRODUCT_PAGE_LINK = "a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"
 PRODUCT_STARS = "a-icon-alt"
 PRODUCT_REVIEWS = "a-size-base s-underline-text"
+STOPWORDS_FILE_PATH = "data/stopwords_list_it.json"
+SPECIAL_CHARACTERS_FILE_PATH = "data/special_characters.json"
+INDEX_FILE_PATH = "data/indexes.json"
 
 def html_find(html_fragment, element : str, html_class : str = ""):
      if html_class == "":
@@ -133,3 +139,39 @@ class Product():
             elif field == "num_reviews":
                 data_info.num_reviews_errors += 1
         return result
+
+
+
+
+
+class SentencePreprocessing():
+
+
+    def __init__(self, stopwords_file_path : str, special_characters_file_path : str):
+        #nltk.download('punkt')
+        with open(stopwords_file_path, 'r') as stopwords_file:
+            data = json.load(stopwords_file)
+        self.stopwords = set(data["words"])
+        with open(special_characters_file_path, 'r') as special_characters_file:
+            data = json.load(special_characters_file)
+        self.special_characters = set(data["special_characters"])
+
+
+    def remove_stopwords(self,words : list[str]) -> list[str]:
+        result = []
+        for word in words:
+            if word.lower() not in self.stopwords and word not in self.special_characters:
+                result.append(word.lower())
+        return result
+    
+    def remove_special_characters(self,words : list[str]) -> list[str]:
+        result = []
+        for word in words:
+            if word not in self.special_characters:
+                result.append(word.lower())
+        return result
+    
+    def preprocess(self,sentence : str, remove_stopwords : bool = True) -> list[str]:
+        tokenized = word_tokenize(sentence)
+        return self.remove_stopwords(tokenized) if remove_stopwords else self.remove_special_characters(tokenized)
+    

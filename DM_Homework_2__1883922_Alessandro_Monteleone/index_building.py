@@ -1,48 +1,11 @@
 import json
-from nltk.tokenize import word_tokenize
-import bisect as bi
+#import bisect as bi
 from math import log2,log10,sqrt
 from amazon_product_analysis import load_data
-import nltk
 from typing import *
 import pandas as pd
 
-STOPWORDS_FILE_PATH = "data/stopwords_list_it.json"
-SPECIAL_CHARACTERS_FILE_PATH = "data/special_characters.json"
-INDEX_FILE_PATH = "data/indexes.json"
-
-class SentencePreprocessing():
-
-
-    def __init__(self, stopwords_file_path : str, special_characters_file_path : str):
-        #nltk.download('punkt')
-        with open(stopwords_file_path, 'r') as stopwords_file:
-            data = json.load(stopwords_file)
-        self.stopwords = set(data["words"])
-        with open(special_characters_file_path, 'r') as special_characters_file:
-            data = json.load(special_characters_file)
-        self.special_characters = set(data["special_characters"])
-
-
-    def remove_stopwords(self,words : list[str]) -> list[str]:
-        result = []
-        for word in words:
-            if word.lower() not in self.stopwords and word not in self.special_characters:
-                result.append(word.lower())
-        return result
-    
-    def remove_special_characters(self,words : list[str]) -> list[str]:
-        result = []
-        for word in words:
-            if word not in self.special_characters:
-                result.append(word.lower())
-        return result
-    
-    def preprocess(self,sentence : str, remove_stopwords : bool = True) -> list[str]:
-        tokenized = word_tokenize(sentence)
-        return self.remove_stopwords(tokenized) if remove_stopwords else self.remove_special_characters(tokenized)
-    
-
+from utils_and_classes import SentencePreprocessing, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH, INDEX_FILE_PATH
     
 def build_index(corpus : list[str], preprocessor : SentencePreprocessing = None) -> tuple[dict[str,list[tuple[int,int]]],list[dict[str,int]]]:
     inverted_index = {}
