@@ -6,7 +6,6 @@ import os
 from amazon_product_analysis import *
 from typing import *
 
-import plotly.graph_objects as go
 
 
 HTML_PAGE = """<!DOCTYPE html>
