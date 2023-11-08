@@ -1,11 +1,10 @@
+import heapq as h
 import json
+from math import log2
 
 import pandas as pd
-from math import log2
-from typing import *
-from utils_and_classes import SentencePreprocessing, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH, INDEX_FILE_PATH, \
-    CATEGORIES
-import heapq as h
+
+from utils_and_classes import INDEX_FILE_PATH, SentencePreprocessing
 
 
 def load_data() -> pd.DataFrame:
@@ -32,7 +31,8 @@ def build_heap_cos_similarity(query, inverted_index, documents_normas):
         h.heappush(cos_similarity_heap, (-document[1], document[0]))
     return cos_similarity_heap
 
-def get_query_result(df,heap,n=-1):
+
+def get_query_result(df, heap, n=-1):
     result_of_query = []
     num_results = len(heap) if n == -1 or n > len(heap) else n
     for _ in range(num_results):
@@ -80,15 +80,15 @@ def compute_weighted_ratings(df):
 
 class QueryProcessor():
 
-    def __init__(self, inverted_index, documents_normas):
-        self.inverted_index = inverted_index
-        self.documents_normas = documents_normas
+    def __init__(self, index_file_path, stopwords_file_path, special_characters_file_path):
+        self.inverted_index, self.documents_normas = retrieve_index(index_file_path)
+        self.preprocessor = SentencePreprocessing(stopwords_file_path, special_characters_file_path)
 
-    def query_process(self, query: str, preprocessor: SentencePreprocessing = None):
-        if preprocessor is None:
-            preprocessor = SentencePreprocessing(STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH)
-        query_tokenized = preprocessor.remove_stopwords(query)
+    def query_process(self, query: str):
+        query_tokenized = self.preprocessor.preprocess(query.lower())
         similarity_heap = build_heap_cos_similarity(query_tokenized, self.inverted_index, self.documents_normas)
+        return similarity_heap
+
 
 
 def test():

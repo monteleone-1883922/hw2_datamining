@@ -1,16 +1,17 @@
 from flask import Flask, render_template, request
 from markupsafe import Markup
-from utils_and_classes import SentencePreprocessing, SPECIAL_CHARACTERS_FILE_PATH, STOPWORDS_FILE_PATH
+
 from amazon_product_analysis import *
-from nltk.tokenize import word_tokenize
+from utils_and_classes import CATEGORIES, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH
 
 app = Flask(__name__)
 df = load_data()
-sp = SentencePreprocessing(STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH)
+qp = QueryProcessor(INDEX_FILE_PATH, STOPWORDS_FILE_PATH,
+                    SPECIAL_CHARACTERS_FILE_PATH)
 
 
 @app.route('/')
-def indxe():
+def index():
     return render_template('index.html')
 
 
@@ -58,10 +59,7 @@ def fixed_queries():
 @app.route('/query', methods=['post'])
 def process_query():
     user_input = request.form['user_input']
-    text_query_raw = user_input.lower()
-    query = sp.preprocess(text_query_raw)
-    inv_indx, norm_indx = retrieve_index(INDEX_FILE_PATH)
-    heap = build_heap_cos_similarity(query, inv_indx, norm_indx)
+    heap = qp.query_process(user_input)
     table = get_query_result(df, heap, 10).to_html()
     table = Markup(table)
     return render_template('base.html', table=table)

@@ -1,12 +1,10 @@
 import json
-#import bisect as bi
-from math import log2,log10,sqrt
-from amazon_product_analysis import load_data
-from typing import *
+from math import log2, sqrt
 import pandas as pd
-
+from amazon_product_analysis import load_data
 from utils_and_classes import SentencePreprocessing, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH, INDEX_FILE_PATH
-    
+
+
 def build_index(corpus : list[str], preprocessor : SentencePreprocessing = None) -> tuple[dict[str,list[tuple[int,int]]],list[dict[str,int]]]:
     inverted_index = {}
     normal_index = []
