@@ -38,8 +38,9 @@ def top10_reviews():
 
 @app.route('/top10rated_weighted', methods=['get'])
 def top10_reviews_weighted():
-    compute_weighted_ratings(df.copy())
-    table = topN(df.copy(), "weighted_ratings", 10, False).to_html()
+    local_df = df.copy()
+    compute_weighted_ratings(local_df)
+    table = topN(local_df, "weighted_ratings", 10).to_html()
     table = Markup(table)
     return render_template('fixed_queries.html', table=table)
 

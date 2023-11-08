@@ -60,7 +60,7 @@ def store_amazon_products():
     ua = UserAgent()
 
     data_info = DataInfo()
-    with open("../data/amazon_products_gpu.tsv", "w") as file:
+    with open(DATA_FILE_PATH, "w") as file:
         file.write("description\tprice\tprime\turl\tstars\tnum_reviews\n")
         retrieve_page_products(0, file, ua, data_info)
     warnings.filterwarnings('default', category=UserWarning, module='fake_useragent')
