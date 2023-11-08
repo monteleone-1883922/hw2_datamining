@@ -25,7 +25,7 @@ START_SERVER = "python3 -m http.server"
 
 def generate_index_html(df : pd.DataFrame) -> None:
     
-    with open("server/index.html", "w") as f:
+    with open("server/base.html", "w") as f:
         html_table = df.to_html()
         f.write(HTML_PAGE.format(html_table))
 
@@ -34,7 +34,7 @@ def generate_index_html(df : pd.DataFrame) -> None:
 def visualize_table(df : pd.DataFrame) -> None:
     generate_index_html(df)
     cwd = os.getcwd()
-    server_dir = os.path.join(cwd, "server")
+    server_dir = os.path.join(cwd, "")
 
     command = START_SERVER  
     process = subprocess.Popen(command, shell=True, text=True, cwd=server_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>DataMining HW 2 Server</title>
-   
+    <meta charset="UTF-8">
+    <title>Menu of the app</title>
+    <style>
+        a {
+            color:black;
+            border: 2px solid black;
+            padding: 20px;
+            display: block; /* Assicurati che gli elementi <a> siano visualizzati come blocchi */
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  
-    <h1  style="text-align:center;">DataMining HW 2 Server</h1>
-  
-    
-    <form action="/process" method="POST">
-        <label for="query1">insert query:</label>
-        <input type="text" id="query1" name="user_input">
-        <input type="submit" value="Invia">
-    </form>
-  
-  
+<h1  style="text-align:center;">DataMining HW 2 Server</h1>
+
+<nav>
+    <a href="/query_menu"> <b >QUERY MENU</b></a>
+    <br >
+    <a href="/fixed_queries"> <b> DEFAULT QUERIES
+    </b> </a>
+</nav>
 </body>
-
-
-  
-
-
-
 </html>

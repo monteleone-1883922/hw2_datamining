@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DataMining HW 2 Server</title>
+    <style>
+
+    </style>
+</head>
+<body>
+  <header>
+      <form action="/" method="get">
+        <button type="submit">Return to main menu</button>
+    </form>
+  </header>
+    <h1  style="text-align:center;">DataMining HW 2 Server</h1>
+  
+    
+    <form action="/process" method="POST"  style="margin-bottom: 20px" >
+        <label for="query1" style="font-size: large" class="centered-input"><b>insert query:</b></label>
+        <input type="text" id="query1" name="user_input"  size="200%">
+        <input type="submit" value="Invia"  >
+    </form>
+    <div>
+        {{ table }}
+    </div>
+
+  
+</body>
+
+</html>

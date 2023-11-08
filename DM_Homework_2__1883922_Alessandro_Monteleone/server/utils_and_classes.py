@@ -31,9 +31,11 @@ PRIME = "a-icon a-icon-prime a-icon-medium"
 PRODUCT_PAGE_LINK = "a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"
 PRODUCT_STARS = "a-icon-alt"
 PRODUCT_REVIEWS = "a-size-base s-underline-text"
-STOPWORDS_FILE_PATH = "data/stopwords_list_it.json"
-SPECIAL_CHARACTERS_FILE_PATH = "data/special_characters.json"
-INDEX_FILE_PATH = "data/indexes.json"
+STOPWORDS_FILE_PATH = "../data/stopwords_list_it.json"
+SPECIAL_CHARACTERS_FILE_PATH = "../data/special_characters.json"
+INDEX_FILE_PATH = "../data/indexes.json"
+CATEGORIES = ['4090', '4080', '7900', '4070', '3090', '6950', '6900', '3080', '6800', '3070', '6850', '2080', '6700', '4060', '3060', '6650', '7600', '6600', '1080', '2070', '4050', '5700', '2060', '1070', '3050', '1660', '680', '980', '590', '660', '6500', '6550', '2060', '580', '1650', '5500', '5600', '6450', '2050', '1060', '480', '970', '390', '570', '780', '290', '470', '280', '960', '380', '280', '290', '5300', '1050', '950', '270', '560']
+
 
 def html_find(html_fragment, element : str, html_class : str = ""):
      if html_class == "":
