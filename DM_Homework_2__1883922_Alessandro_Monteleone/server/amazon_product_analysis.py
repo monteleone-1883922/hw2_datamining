@@ -11,8 +11,23 @@ def load_data() -> pd.DataFrame:
     return pd.read_csv("../data/amazon_products_gpu.tsv", sep="\t")
 
 
+def load_and_retype_data():
+    data = load_data()
+    retype_dataframe(data)
+    return data
+def retype_dataframe(df):
+    df["price"] = df["price"].apply(lambda x: x.replace(".", "").replace(",", ".") if pd.notna(x) else x)
+    df["price"] = df["price"].astype(float)
+    df["stars"] = df["stars"].apply(lambda x: x.replace(",", ".") if pd.notna(x) else x)
+    df["stars"] = df["stars"].astype(float)
+    df["num_reviews"] = df["num_reviews"].apply(lambda x: x.replace(".", "") if pd.notna(x) else x)
+    df["num_reviews"] = df["num_reviews"].astype(int)
+    df["prime"] = df["prime"].astype(bool)
+
+
+
 def topN(df: pd.DataFrame, column: str, n: int, numeric: bool = True, higher: bool = True) -> pd.DataFrame:
-    if numeric:
+    if numeric and df[column].dtype == str:
         df[column] = df[column].apply(lambda x: x.replace(".", "").replace(",", ".") if pd.notna(x) else x)
         df[column] = df[column].astype(float)
     return df.sort_values(by=column, ascending=not higher).head(n)
@@ -42,6 +57,7 @@ def get_query_result(df, heap, n=-1):
 
 def price_range_for_categories(description_and_price, categories):
     categories_price_range = {category: [-1, -1] for category in categories}
+
     description_and_price["price"] = description_and_price["price"].apply(
         lambda x: x.replace(".", "").replace(",", ".") if pd.notna(x) else x)
     description_and_price["price"] = description_and_price["price"].astype(float)
@@ -71,11 +87,33 @@ def retrieve_index(index_path):
     return data["inverted_index"], data["documents_TFIDF"]
 
 
-def compute_weighted_ratings(df):
-    weighted_ratings = [float(row["stars"].replace(",", ".")) * log2(int(row["num_reviews"]))
-                        if pd.notna(row["stars"]) and pd.notna(row["num_reviews"])
-                        else row["stars"] for index, row in df.iterrows()]
+def compute_weighted_ratings(df: pd.DataFrame):
+    weighted_ratings = [float(row["stars"].replace(",", ".")) if type(row["stars"]) == str
+                        else row["stars"] *
+        log2(int(row["num_reviews"])) if type(row["num_reviews"]) == str
+                        else row["num_reviews"]
+        if pd.notna(row["stars"]) and pd.notna(row["num_reviews"])
+        else row["stars"] for index, row in df.iterrows()]
     df["weighted_ratings"] = pd.Series(weighted_ratings)
+
+
+def analyze_primeness(df: pd.DataFrame):
+    if df["price"].dtype == str:
+        df["price"] = df["price"].apply(lambda x: x.replace(".", "").replace(",", ".") if pd.notna(x) else x)
+        df["price"] = df["price"].astype(float)
+    if df["stars"].dtype == str:
+        df["stars"] = df["stars"].apply(lambda x: x.replace(",", ".") if pd.notna(x) else x)
+        df["stars"] = df["stars"].astype(float)
+    if df["prime"].dtype == str:
+        df["prime"] = df["prime"].astype(bool)
+    avg_price = df["price"].mean()
+    avg_stars = df["stars"].mean()
+    prime_products = df[df["prime"]]
+    avg_price_prime = prime_products["price"].mean()
+    avg_stars_prime = prime_products["stars"].mean()
+    return pd.DataFrame(
+        {"average price": [avg_price], "average price prime products": [avg_price_prime], "average stars": [avg_stars],
+         "average stars prime products": [avg_stars_prime]})
 
 
 class QueryProcessor():
@@ -88,7 +126,6 @@ class QueryProcessor():
         query_tokenized = self.preprocessor.preprocess(query.lower())
         similarity_heap = build_heap_cos_similarity(query_tokenized, self.inverted_index, self.documents_normas)
         return similarity_heap
-
 
 
 def test():

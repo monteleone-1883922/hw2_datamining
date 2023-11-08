@@ -2,10 +2,10 @@ from flask import Flask, render_template, request
 from markupsafe import Markup
 
 from amazon_product_analysis import *
-from utils_and_classes import CATEGORIES, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH
+from utils_and_classes import CATEGORIES, STOPWORDS_FILE_PATH, SPECIAL_CHARACTERS_FILE_PATH, MAX_NUM_RESULTS_FOR_QUERY
 
 app = Flask(__name__)
-df = load_data()
+df = load_and_retype_data()
 qp = QueryProcessor(INDEX_FILE_PATH, STOPWORDS_FILE_PATH,
                     SPECIAL_CHARACTERS_FILE_PATH)
 
@@ -24,29 +24,29 @@ def query_menu():
 
 @app.route('/top10price', methods=['get'])
 def top10_prices():
-    table = topN(df, "price", 10).to_html()
+    table = topN(df.copy(), "price", 10).to_html()
     table = Markup(table)
     return render_template('fixed_queries.html', table=table)
 
 
 @app.route('/top10rated', methods=['get'])
 def top10_reviews():
-    table = topN(df, "stars", 10).to_html()
+    table = topN(df.copy(), "stars", 10).to_html()
     table = Markup(table)
     return render_template('fixed_queries.html', table=table)
 
 
 @app.route('/top10rated_weighted', methods=['get'])
 def top10_reviews_weighted():
-    compute_weighted_ratings(df)
-    table = topN(df, "weighted_ratings", 10, False).to_html()
+    compute_weighted_ratings(df.copy())
+    table = topN(df.copy(), "weighted_ratings", 10, False).to_html()
     table = Markup(table)
     return render_template('fixed_queries.html', table=table)
 
 
 @app.route('/price_categories', methods=['get'])
 def price_categories():
-    table = price_range_for_categories(df[["description", "price"]], CATEGORIES).to_html()
+    table = price_range_for_categories(df.copy()[["description", "price"]], CATEGORIES).to_html()
     table = Markup(table)
     return render_template('fixed_queries.html', table=table)
 
@@ -60,9 +60,15 @@ def fixed_queries():
 def process_query():
     user_input = request.form['user_input']
     heap = qp.query_process(user_input)
-    table = get_query_result(df, heap, 10).to_html()
+    table = get_query_result(df.copy(), heap, MAX_NUM_RESULTS_FOR_QUERY).to_html()
     table = Markup(table)
     return render_template('base.html', table=table)
+
+@app.route('/analyze_primeness', methods=['get'])
+def analyze_primeness_query():
+    table = analyze_primeness(df.copy()).to_html()
+    table = Markup(table)
+    return render_template('fixed_queries.html', table=table)
 
 
 if __name__ == '__main__':
