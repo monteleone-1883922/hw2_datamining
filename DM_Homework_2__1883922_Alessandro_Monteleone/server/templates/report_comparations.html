@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>report comparations</title>
+    <style>
+        a {
+            color:black;
+            border: 2px solid black;
+            padding: 20px;
+            display: block; /* Assicurati che gli elementi <a> siano visualizzati come blocchi */
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
@@ -11,8 +21,57 @@
         <button type="submit">Return to main menu</button>
     </form>
   </header>
-    <h1  style="text-align:center;">DataMining HW 2 Server</h1>
+<main>
+       <h1  style="text-align:center;">DataMining HW 2 Server</h1>
 <h2 style="text-align:center;">Report of the result of comparing  </h2>
+<div style="display: flex">
+    <img src="{{url_for('static', filename='lsh_approximation.png')}}" />
+
+     <ul>
+         <li><b>Threshold: </b>0.8</li>
+         <li><b>Bands: </b>7</li>
+         <li><b>Rows: </b>10</li>
+     </ul>
+</div>
+<div>
+    <h3 >Report for LSH and Jaccard similarity without using Spark</h3>
+        <ul>
+         <li>
+             Number of duplicates for LSH: {{lsh_num_duplicates}}
+         </li>
+         <li>Number of duplicates for Jaccard similarity: {{jaccard_num_duplicates}}</li>
+         <li>Size of intersection between Jaccard and LSH results: {{size_intersection_results}}</li>
+            <li>Time required for the execution of LSH algorithm: {{lsh_last_execution_time}}</li>
+            <li>Time required for the execution of Jaccard similarity algorithm: {{jaccard_last_execution_time}}</li>
+     </ul>
+
+
+    <h3>Report for LSH and Jaccard similarity using Spark</h3>
+
+    <ul>
+         <li>
+             Number of duplicates for LSH: {{lsh_num_duplicates_spark}}
+         </li>
+         <li>Number of duplicates for Jaccard similarity: {{jaccard_num_duplicates_spark}}</li>
+         <li>Size of intersection between Jaccard and LSH results: {{size_intersection_results_spark}}</li>
+            <li>Time required for the execution of LSH algorithm: {{lsh_last_execution_time_spark}}</li>
+            <li>Time required for the execution of Jaccard similarity algorithm: {{jaccard_last_execution_time_spark}}</li>
+     </ul>
+
+</div>
+
+    <div>
+        <h3 style="text-align: center">Visualize nearest documents</h3>
+        <nav>
+    <a href="/lsh_nearest"> <b >NEAREST DOCUMENTS FOR LSH</b></a>
+    <br >
+    <a href="/jaccard_nearest"> <b>NEAREST DOCUMENTS FOR JACCARD
+    </b> </a>
+
+</nav>
+    </div>
+</main>
+
 
 </body>
 </html>

@@ -132,7 +132,9 @@ def compare_nearest_documents(df, jaccard_similarity: CompareWithJaccardSimilari
 
 
 
-
+def load_report(file):
+    with open(file,"r") as report_file:
+        return json.load(report_file)
 
 class Report():
 
