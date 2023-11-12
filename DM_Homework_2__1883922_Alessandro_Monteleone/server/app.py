@@ -22,21 +22,21 @@ def index():
 def query_menu():
     table = df.to_html()
     table = Markup(table)
-    return render_template('base.html', table=table)
+    return render_template('base.html', table=table, query="")
 
 
 @app.route('/top10price', methods=['get'])
 def top10_prices():
     table = topN(df.copy(), "price", 10).to_html()
     table = Markup(table)
-    return render_template('fixed_queries.html', table=table)
+    return render_template('fixed_queries.html', table=table, query="Top 10 products by price")
 
 
 @app.route('/top10rated', methods=['get'])
 def top10_reviews():
     table = topN(df.copy(), "stars", 10).to_html()
     table = Markup(table)
-    return render_template('fixed_queries.html', table=table)
+    return render_template('fixed_queries.html', table=table, query="Top 10 products by ratings")
 
 
 @app.route('/top10rated_weighted', methods=['get'])
@@ -45,14 +45,14 @@ def top10_reviews_weighted():
     compute_weighted_ratings(local_df)
     table = topN(local_df, "weighted_ratings", 10).to_html()
     table = Markup(table)
-    return render_template('fixed_queries.html', table=table)
+    return render_template('fixed_queries.html', table=table, query="Top 10 products by weighted ratings")
 
 
 @app.route('/price_categories', methods=['get'])
 def price_categories():
     table = price_range_for_categories(df.copy()[["description", "price"]], CATEGORIES).to_html()
     table = Markup(table)
-    return render_template('fixed_queries.html', table=table)
+    return render_template('fixed_queries.html', table=table, query="Price range for different series of gpu")
 
 
 @app.route('/fixed_queries', methods=['get'])
@@ -66,17 +66,21 @@ def process_query():
     heap = qp.query_process(user_input)
     table = get_query_result(df.copy(), heap, MAX_NUM_RESULTS_FOR_QUERY).to_html()
     table = Markup(table)
-    return render_template('base.html', table=table)
+    return render_template('base.html', table=table, query=user_input)
 
 @app.route('/analyze_primeness', methods=['get'])
 def analyze_primeness_query():
     table = analyze_primeness(df.copy()).to_html()
     table = Markup(table)
-    return render_template('fixed_queries.html', table=table)
+    return render_template('fixed_queries.html', table=table, query="Analyze primeness")
 
 @app.route('/nearest_products', methods=['get'])
 def nearest_products_reports():
     report = load_report(PATH_REPORT)
+    # lsh_result = {tuple(el) for el in report["lsh_result"]}
+    # jaccard_result = {tuple(el) for el in report["jaccard_result"]}
+    # print("false positives = ", len(lsh_result.difference(jaccard_result)))
+    # print("false negatives = ", len(jaccard_result.difference(lsh_result)))
     report_spark = load_report(PATH_REPORT_SPARK)
     return render_template('report_comparations.html',
                            jaccard_num_duplicates=report["jaccard_num_duplicates"],

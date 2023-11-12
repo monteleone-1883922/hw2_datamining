@@ -1,12 +1,10 @@
-
 from utils_for_hashing import *
 import time
 
 
-
 class CompareWithLSHSpark():
 
-    def __init__(self,k,b,r,shingling_hash,minwise_hashes,lsh_hashes):
+    def __init__(self, k, b, r, shingling_hash, minwise_hashes, lsh_hashes):
         self.k = k
         self.b = b
         self.r = r
@@ -18,17 +16,18 @@ class CompareWithLSHSpark():
     def get_last_execution_time(self):
         return self.execution_times[-1]
 
-    def compute_nearest_documents(self,documents):
+    def compute_nearest_documents(self, documents):
         start_time = int(time.time() * 1000)
         rdd = documents.zipWithIndex()
 
         # returns set of tuples (id,hash(shingle))
         shingles = rdd.flatMap(
-            lambda line: [(line[1], self.shingling_hash(line[0][0][i: i + self.k])) for i in range(len(line[0][0]) - self.k + 1)])
+            lambda line: [(line[1], self.shingling_hash(line[0][0][i: i + self.k])) for i in
+                          range(len(line[0][0]) - self.k + 1)])
         # minwise hashing
         # returns set of tuples (id, num hash), hashed element
         minwise_hashing1 = shingles.flatMap(
-            lambda line: [((line[0], i), apply_hash(self.minwise_hashes, line[1], i)) for i in range(self.b*self.r)])
+            lambda line: [((line[0], i), apply_hash(self.minwise_hashes, line[1], i)) for i in range(self.b * self.r)])
 
         # returns a set of tuples (id, num hash), min between all hashed elements with hash num hash of document id
         minwise_hashing2 = minwise_hashing1.reduceByKey(lambda hash1, hash2: min(hash1, hash2))
@@ -57,7 +56,7 @@ class CompareWithLSHSpark():
 
 class CompareWithJaccardSimilaritySpark():
 
-    def __init__(self,k,threshold, hash):
+    def __init__(self, k, threshold, hash):
         self.k = k
         self.threshold = threshold
         self.num_records = 0
@@ -90,4 +89,3 @@ class CompareWithJaccardSimilaritySpark():
 
         self.execution_times.append(int(time.time() * 1000) - start_time)
         return result_jaccard
-

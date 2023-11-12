@@ -1,11 +1,11 @@
 import json
 import sys
-from utils_for_hashing import hashFamily,NUM_PARTITIONS,PATH_REPORT,PATH_REPORT_SPARK
+from utils_for_hashing import hashFamily, NUM_PARTITIONS, PATH_REPORT, PATH_REPORT_SPARK
 
 import time
 import pandas as pd
 import pyspark as pk
-from hashing_techniques_with_spark import CompareWithLSHSpark,CompareWithJaccardSimilaritySpark
+from hashing_techniques_with_spark import CompareWithLSHSpark, CompareWithJaccardSimilaritySpark
 from amazon_product_analysis import load_data
 
 
@@ -131,10 +131,10 @@ def compare_nearest_documents(df, jaccard_similarity: CompareWithJaccardSimilari
     return lsh_nearest, jaccard_nearest
 
 
-
 def load_report(file):
-    with open(file,"r") as report_file:
+    with open(file, "r") as report_file:
         return json.load(report_file)
+
 
 class Report():
 
@@ -147,7 +147,7 @@ class Report():
         self.lsh_last_execution_time = None
         self.jaccard_last_execution_time = None
 
-    def save_results(self,lsh_result, jaccard_result, lsh_exec_time, jaccard_exec_time):
+    def save_results(self, lsh_result, jaccard_result, lsh_exec_time, jaccard_exec_time):
         self.lsh_result = lsh_result
         self.jaccard_result = jaccard_result
         self.lsh_num_duplicates = len(lsh_result)
@@ -167,10 +167,11 @@ class Report():
         lsh_comparator = CompareWithLSH(shingling, minwise_hashing, lsh)
         jaccard_comparator = CompareWithJaccardSimilarity(shingling)
         lsh_result = lsh_comparator.compute_nearest_documents(documents)
-        jaccard_result = jaccard_comparator.compute_nearest_documents(documents,0.8)
-        self.save_results(lsh_result,jaccard_result,lsh_comparator.get_last_execution_time(),jaccard_comparator.get_last_execution_time() )
+        jaccard_result = jaccard_comparator.compute_nearest_documents(documents, 0.8)
+        self.save_results(lsh_result, jaccard_result, lsh_comparator.get_last_execution_time(),
+                          jaccard_comparator.get_last_execution_time())
 
-    def build_report_spark(self,df):
+    def build_report_spark(self, df):
         documents = df["description"]
         shingling_hash = hashFamily(1)
         minwise_hashes = [hashFamily(i) for i in range(2, 72)]
@@ -178,14 +179,15 @@ class Report():
         documents = pd.DataFrame(documents)
         sc = pk.SparkContext("local[*]")
         documents_rdd = sc.parallelize(documents.to_records(index=False), NUM_PARTITIONS)
-        lsh_comparator = CompareWithLSHSpark(10,7,10,shingling_hash,minwise_hashes,lsh_hashes)
-        jaccard_comparator = CompareWithJaccardSimilaritySpark(10,0.8,shingling_hash)
+        lsh_comparator = CompareWithLSHSpark(10, 7, 10, shingling_hash, minwise_hashes, lsh_hashes)
+        jaccard_comparator = CompareWithJaccardSimilaritySpark(10, 0.8, shingling_hash)
         lsh_result = lsh_comparator.compute_nearest_documents(documents_rdd)
         jaccard_result = jaccard_comparator.compute_nearest_documents(documents_rdd)
-        self.save_results(lsh_result,jaccard_result,lsh_comparator.get_last_execution_time(),jaccard_comparator.get_last_execution_time() )
+        self.save_results(lsh_result, jaccard_result, lsh_comparator.get_last_execution_time(),
+                          jaccard_comparator.get_last_execution_time())
         sc.stop()
 
-    def store_report(self,file):
+    def store_report(self, file):
         with open(file, "w") as report_file:
             report = {
                 "lsh_result": list(self.lsh_result),
@@ -209,7 +211,6 @@ def main():
     print("end report2")
     report.store_report(PATH_REPORT)
     report_spark.store_report(PATH_REPORT_SPARK)
-
 
 
 if __name__ == "__main__":

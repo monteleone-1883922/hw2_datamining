@@ -39,7 +39,7 @@ def build_heap_cos_similarity(query: list[str], inverted_index: dict[str, list[t
     h.heapify(cos_similarity_heap)
     documents_similarities = {}
     for word in query:
-        documents_containing_word = inverted_index[word]
+        documents_containing_word = inverted_index.get(word, [])
         for document in documents_containing_word:
             documents_similarities[document[0]] = documents_similarities.get(document[0], 0) + document[1] / \
                                                   documents_normas[document[0]]
