@@ -1,9 +1,11 @@
+import json
 import sys
-import hashlib
-from typing import Callable
-import time
-import datetime
+from utils_for_hashing import hashFamily,NUM_PARTITIONS,PATH_REPORT,PATH_REPORT_SPARK
 
+import time
+import pandas as pd
+import pyspark as pk
+from hashing_techniques_with_spark import CompareWithLSHSpark,CompareWithJaccardSimilaritySpark
 from amazon_product_analysis import load_data
 
 
@@ -131,23 +133,6 @@ def compare_nearest_documents(df, jaccard_similarity: CompareWithJaccardSimilari
 
 
 
-def hashFamily(i):
-    resultSize = 8
-    # how many bytes we want back
-    maxLen = 20
-    # how long can our i be (in decimal)
-    salt = str(i).zfill(maxLen)[-maxLen:]
-    salt = salt.encode('utf-8')
-
-    def hashMember(x):
-        if type(x) is str:
-            x = x.encode('utf-8')
-        elif type(x) is list:
-            x = b"".join(x)
-        return hashlib.sha1(x + salt).digest()[-resultSize:]
-
-    return hashMember
-
 
 class Report():
 
@@ -159,6 +144,15 @@ class Report():
         self.size_intersection_results = None
         self.lsh_last_execution_time = None
         self.jaccard_last_execution_time = None
+
+    def save_results(self,lsh_result, jaccard_result, lsh_exec_time, jaccard_exec_time):
+        self.lsh_result = lsh_result
+        self.jaccard_result = jaccard_result
+        self.lsh_num_duplicates = len(lsh_result)
+        self.jaccard_num_duplicates = len(jaccard_result)
+        self.size_intersection_results = len(lsh_result.intersection(jaccard_result))
+        self.lsh_last_execution_time = lsh_exec_time
+        self.jaccard_last_execution_time = jaccard_exec_time
 
     def build_report(self, df):
         documents = df["description"].tolist()
@@ -172,28 +166,49 @@ class Report():
         jaccard_comparator = CompareWithJaccardSimilarity(shingling)
         lsh_result = lsh_comparator.compute_nearest_documents(documents)
         jaccard_result = jaccard_comparator.compute_nearest_documents(documents,0.8)
-        self.lsh_result = lsh_result
-        self.jaccard_result = jaccard_result
-        self.lsh_num_duplicates = len(lsh_result)
-        self.jaccard_num_duplicates = len(jaccard_result)
-        self.size_intersection_results = len(lsh_result.intersection(jaccard_result))
-        self.lsh_last_execution_time = lsh_comparator.get_last_execution_time()
-        self.jaccard_last_execution_time = jaccard_comparator.get_last_execution_time()
+        self.save_results(lsh_result,jaccard_result,lsh_comparator.get_last_execution_time(),jaccard_comparator.get_last_execution_time() )
+
+    def build_report_spark(self,df):
+        documents = df["description"]
+        shingling_hash = hashFamily(1)
+        minwise_hashes = [hashFamily(i) for i in range(2, 72)]
+        lsh_hashes = [hashFamily(72)]
+        documents = pd.DataFrame(documents)
+        sc = pk.SparkContext("local[*]")
+        documents_rdd = sc.parallelize(documents.to_records(index=False), NUM_PARTITIONS)
+        lsh_comparator = CompareWithLSHSpark(10,7,10,shingling_hash,minwise_hashes,lsh_hashes)
+        jaccard_comparator = CompareWithJaccardSimilaritySpark(10,0.8,shingling_hash)
+        lsh_result = lsh_comparator.compute_nearest_documents(documents_rdd)
+        jaccard_result = jaccard_comparator.compute_nearest_documents(documents_rdd)
+        self.save_results(lsh_result,jaccard_result,lsh_comparator.get_last_execution_time(),jaccard_comparator.get_last_execution_time() )
+        sc.stop()
+
+    def store_report(self,file):
+        with open(file, "w") as report_file:
+            report = {
+                "lsh_result": list(self.lsh_result),
+                "jaccard_result": list(self.jaccard_result),
+                "lsh_num_duplicates": self.lsh_num_duplicates,
+                "jaccard_num_duplicates": self.jaccard_num_duplicates,
+                "size_intersection_results": self.size_intersection_results,
+                "lsh_last_execution_time": self.lsh_last_execution_time,
+                "jaccard_last_execution_time": self.jaccard_last_execution_time
+            }
+            json.dump(report, report_file, indent=4)
 
 
-def test():
+def main():
     df = load_data()
     report = Report()
     report.build_report(df)
-    with open("report.txt", "w") as f:
-        f.write("lsh_result: " + str(report.lsh_result) + "\n")
-        f.write("jaccard_result: " + str(report.jaccard_result) + "\n")
-        f.write("lsh_num_duplicates: " + str(report.lsh_num_duplicates) + "\n")
-        f.write("jaccard_num_duplicates: " + str(report.jaccard_num_duplicates) + "\n")
-        f.write("size_intersection_results: " + str(report.size_intersection_results) + "\n")
-        f.write("lsh_last_execution_time: " + str(report.lsh_last_execution_time) + "\n")
-        f.write("jaccard_last_execution_time: " + str(report.jaccard_last_execution_time) + "\n")
+    print("end report1")
+    report_spark = Report()
+    report_spark.build_report_spark(df)
+    print("end report2")
+    report.store_report(PATH_REPORT)
+    report_spark.store_report(PATH_REPORT_SPARK)
+
 
 
 if __name__ == "__main__":
-    test()
+    main()

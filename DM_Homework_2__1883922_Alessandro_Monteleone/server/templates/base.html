@@ -14,8 +14,8 @@
   </header>
     <h1  style="text-align:center;">DataMining HW 2 Server</h1>
   
-    
-    <form action="/query" method="POST"  style="margin-bottom: 20px" >
+    <main>
+        <form action="/query" method="POST"  style="margin-bottom: 20px" >
         <label for="query1" style="font-size: large" class="centered-input"><b>insert query:</b></label>
         <input type="text" id="query1" name="user_input"  size="200%">
         <input type="submit" value="Invia"  >
@@ -23,6 +23,8 @@
     <div>
         {{ table }}
     </div>
+    </main>
+
 
   
 </body>
