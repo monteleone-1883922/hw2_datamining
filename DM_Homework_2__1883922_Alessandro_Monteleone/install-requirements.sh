@@ -1,0 +1,1 @@
+pip install flask pandas lxml nltk fake_useragent pyspark

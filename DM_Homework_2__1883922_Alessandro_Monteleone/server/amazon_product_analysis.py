@@ -11,13 +11,13 @@ def load_data() -> pd.DataFrame:
     return pd.read_csv(DATA_FILE_PATH, sep="\t")
 
 
-def load_and_retype_data():
+def load_and_retype_data() -> pd.DataFrame:
     data = load_data()
     retype_dataframe(data)
     return data
 
 
-def retype_dataframe(df):
+def retype_dataframe(df: pd.DataFrame) -> None:
     df["price"] = df["price"].apply(lambda x: x.replace(".", "").replace(",", ".") if pd.notna(x) else x)
     df["price"] = df["price"].astype(float)
     df["stars"] = df["stars"].apply(lambda x: x.replace(",", ".") if pd.notna(x) else x)
@@ -33,21 +33,22 @@ def topN(df: pd.DataFrame, column: str, n: int, higher: bool = True) -> pd.DataF
     return df.sort_values(by=column, ascending=not higher).head(n)
 
 
-def build_heap_cos_similarity(query, inverted_index, documents_normas):
+def build_heap_cos_similarity(query: list[str], inverted_index: dict[str, list[tuple[int, int]]],
+                              documents_normas: list[float]) -> list[tuple[float, int]]:
     cos_similarity_heap = []
     h.heapify(cos_similarity_heap)
     documents_similarities = {}
     for word in query:
-        documents_containing_word = inverted_index[word]
+        documents_containing_word = inverted_index.get(word, [])
         for document in documents_containing_word:
             documents_similarities[document[0]] = documents_similarities.get(document[0], 0) + document[1] / \
-                                                  documents_normas[document[0]][1]
+                                                  documents_normas[document[0]]
     for document in documents_similarities.items():
         h.heappush(cos_similarity_heap, (-document[1], document[0]))
     return cos_similarity_heap
 
 
-def get_query_result(df, heap, n=-1):
+def get_query_result(df: pd.DataFrame, heap: list[tuple[float, int]], n: int = -1) -> pd.DataFrame:
     result_of_query = []
     num_results = len(heap) if n == -1 or n > len(heap) else n
     for _ in range(num_results):
@@ -55,7 +56,7 @@ def get_query_result(df, heap, n=-1):
     return df.loc[result_of_query]
 
 
-def price_range_for_categories(description_and_price, categories):
+def price_range_for_categories(description_and_price: pd.DataFrame, categories: list[str]) -> pd.DataFrame:
     categories_price_range = {category: [-1, -1] for category in categories}
 
     for index, row in description_and_price.iterrows():
@@ -78,13 +79,13 @@ def price_range_for_categories(description_and_price, categories):
     return pd.DataFrame(categories_price_range_clean)
 
 
-def retrieve_index(index_path):
+def retrieve_index(index_path: str) -> tuple[dict[str, list[tuple[int, int]]], list[float]]:
     with open(index_path, "r") as index_file:
         data = json.load(index_file)
     return data["inverted_index"], data["documents_TFIDF"]
 
 
-def compute_weighted_ratings(df: pd.DataFrame):
+def compute_weighted_ratings(df: pd.DataFrame) -> None:
     weighted_ratings = [row["stars"] *
                         log2(row["num_reviews"])
                         if pd.notna(row["stars"]) and pd.notna(row["num_reviews"])
@@ -92,7 +93,7 @@ def compute_weighted_ratings(df: pd.DataFrame):
     df["weighted_ratings"] = pd.Series(weighted_ratings)
 
 
-def analyze_primeness(df: pd.DataFrame):
+def analyze_primeness(df: pd.DataFrame) -> pd.DataFrame:
     prices = df["price"].dropna()
     stars = df["stars"].dropna()
     avg_price = round(prices.mean(), 2)
@@ -109,11 +110,11 @@ def analyze_primeness(df: pd.DataFrame):
 
 class QueryProcessor():
 
-    def __init__(self, index_file_path, stopwords_file_path, special_characters_file_path):
+    def __init__(self, index_file_path: str, stopwords_file_path: str, special_characters_file_path: str):
         self.inverted_index, self.documents_normas = retrieve_index(index_file_path)
         self.preprocessor = SentencePreprocessing(stopwords_file_path, special_characters_file_path)
 
-    def query_process(self, query: str):
+    def query_process(self, query: str) -> list[tuple[float, int]]:
         query_tokenized = self.preprocessor.preprocess(query.lower())
         similarity_heap = build_heap_cos_similarity(query_tokenized, self.inverted_index, self.documents_normas)
         return similarity_heap
